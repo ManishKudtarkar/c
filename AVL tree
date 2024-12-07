@@ -1,0 +1,155 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int A[10] = {20,10,30,5,12,25,35,37,39};
+
+struct node
+{
+    int val;
+    int ht;
+    int bal_f;
+    struct node *right;
+    struct node *left;
+};
+
+struct node *root;
+
+struct node *getnode()
+{
+    struct node *p;
+    static int j=0;
+    
+    p=(struct node*)malloc(sizeof(struct node));
+    //printf("Enter the value: \n");
+    //scanf("%d",&(p->val));
+    
+    p->val = A[j++];
+    
+    p->left=NULL;
+    p->right=NULL;
+    return p;
+}
+
+int height(struct node * p)
+{
+    int h,h1,h2;
+    
+    if (p==NULL)
+        return 0;
+    
+    h1 = height(p->left)+1;
+    h2 = height(p->right)+1;
+    
+    if(h2>h1) // max of h1 and h2
+        h = h2;
+    else
+        h = h1;
+    
+    p->ht = h;
+    p->bal_f = h1-h2;
+    
+    return(h);
+}
+
+void Insert(struct node *n)
+{
+    struct node *p,*q;
+    p=q=root;
+    while(p!=NULL)
+    {
+       q=p;
+       if(n->val>p->val)
+       {
+            p=p->right;
+       }
+       else
+       {
+            p=p->left;
+       }
+    }// now q is on the TO BE PARENT of n->val
+    if(n->val>q->val)
+    {
+        printf("Inserting %d on right of %d \n",n->val,q->val);
+        q->right=n;
+    }
+    else
+    {
+        printf("Inserting %d on left of %d \n",n->val,q->val);
+        q->left=n;
+    }
+}
+
+void Inorder(struct node*p)
+{
+    if (p == NULL)
+        return;
+    Inorder(p->left);
+    printf("%d (h: %d bf: %d) \t", p->val,p->ht,p->bal_f);
+    Inorder(p->right);
+}
+
+void LeftRotate(struct node *p)
+{
+    int temp;//smallest value 35
+    
+    p->left=p->right->right;
+    p->right->right=NULL;//move the right to the left
+    
+    temp=p->left->val;//Swap values Appropriately
+    p->left->val=p->val;
+    p->val=p->right->val;
+    p->right->val=temp;
+    
+}
+
+void Balance(struct node*p)
+{
+    static int flag = 1;
+    
+    if (p == NULL) 
+        return;
+    
+    Balance(p->left);
+    Balance(p->right);
+    
+    if((p->bal_f == -2) && flag)
+    {
+        printf("\n I am balancing on right at %d \n", p->val);
+        flag = 0;
+        LeftRotate(p);
+    }
+    
+    else if((p->bal_f == 2) && flag)
+    {
+        printf("\n I am balancing on left at %d \n", p->val);
+        flag = 0;
+        //RightRotate(p);
+    }
+}
+
+int main()
+{
+    struct node *k;
+    int x,i;
+    
+    root=getnode(); // single node tree is ready
+    for(i=0; i<8; i++)
+    {
+        k = getnode();
+        Insert(k);
+    }
+    
+   
+    
+    x = height(root);
+    printf("\n Height of the root is %d \n",x);
+    Inorder(root);
+    
+    Balance(root);
+  
+    x = height(root);
+    printf("\n Height of the root is %d \n",x);
+    Inorder(root);
+    
+    return 0;
+}
